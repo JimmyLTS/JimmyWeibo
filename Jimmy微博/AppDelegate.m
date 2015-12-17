@@ -7,6 +7,14 @@
 //
 
 #import "AppDelegate.h"
+#import "MainTabBarController.h"
+#import "LeftDrawerViewController.h"
+#import "RightDrawerViewController.h"
+#import "MMDrawerController.h"
+#import "MMDrawerVisualState.h"
+
+#import "BaseNavigationController.h"
+#import "HomeViewController.h"
 
 @interface AppDelegate ()
 
@@ -16,9 +24,103 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    NSLog(@"%@", NSHomeDirectory());
     // Override point for customization after application launch.
+    self.sinaweibo = [[SinaWeibo alloc]initWithAppKey:kAppKey appSecret:kAppSecret appRedirectURI:kAppRedirectURI andDelegate:self];
+    
+    //1、创建tabBarController
+    self.window = [[UIWindow alloc]initWithFrame:[UIScreen mainScreen].bounds];
+    [self.window makeKeyAndVisible];
+    
+    
+    MainTabBarController *mainTabBarController = [[MainTabBarController alloc]init];
+    
+    LeftDrawerViewController *leftViewController = [[LeftDrawerViewController alloc]init];
+    RightDrawerViewController *rightViewContoller = [[RightDrawerViewController alloc]init];
+    
+    MMDrawerController * drawerController = [[MMDrawerController alloc]
+                                             initWithCenterViewController:mainTabBarController
+                                             leftDrawerViewController:leftViewController
+                                             rightDrawerViewController:rightViewContoller];
+    
+    [drawerController setMaximumRightDrawerWidth:150.0];
+    [drawerController setMaximumLeftDrawerWidth:150.0];
+    
+    [drawerController setOpenDrawerGestureModeMask:MMOpenDrawerGestureModeNone];
+    [drawerController setCloseDrawerGestureModeMask:MMCloseDrawerGestureModeAll];
+    
+    MMDrawerControllerDrawerVisualStateBlock block = [MMDrawerVisualState swingingDoorVisualStateBlock];
+    
+    [drawerController setDrawerVisualStateBlock:block];
+    
+    self.window.rootViewController = drawerController;
+    
+    
+    //2、从沙河中读取数据
+    [self readAuthData];
+    
     return YES;
 }
+
+
+#pragma mark - SinaWeiboDelegate
+//新浪微博登录代理
+- (void)sinaweiboDidLogIn:(SinaWeibo *)sinaweibo {
+    
+    NSLog(@"登陆成功");
+    
+    [self storeAuthData];
+    
+    MMDrawerController *draw = (MMDrawerController *)self.window.rootViewController;
+    
+    MainTabBarController *main = (MainTabBarController *)draw.centerViewController;
+    NSArray *vcArray = main.viewControllers;
+    
+    BaseNavigationController *b = (BaseNavigationController *)vcArray[0];
+    
+    HomeViewController *h = (HomeViewController *)b.viewControllers.lastObject;
+    
+    [h loadWeiboNewData];
+}
+
+
+
+//新浪微博注销代理
+- (void)sinaweiboDidLogOut:(SinaWeibo *)sinaweibo {
+    
+    NSLog(@"注销成功");
+    
+}
+
+//存储账号信息
+- (void)storeAuthData {
+    SinaWeibo *sinaWeibo = self.sinaweibo;
+    
+    NSDictionary *authData = [NSDictionary dictionaryWithObjectsAndKeys:
+                              sinaWeibo.accessToken,@"AccessTokenKey",
+                              sinaWeibo.expirationDate,@"ExpirationDateKey",
+                              sinaWeibo.userID,@"UserIDKey",
+                              sinaWeibo.refreshToken,@"refresh_token",nil];
+    [[NSUserDefaults standardUserDefaults] setObject:authData forKey:@"JimmyWeiboAuthData"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
+}
+
+//重复登录，读取账号信息
+- (void)readAuthData {
+    
+    NSDictionary *authData = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JimmyWeiboAuthData"];
+    
+    if ([authData objectForKey:@"AccessTokenKey"] && [authData objectForKey:@"ExpirationDateKey"] && [authData objectForKey:@"UserIDKey"]) {
+        self.sinaweibo.accessToken = [authData objectForKey:@"AccessTokenKey"];
+        self.sinaweibo.userID = [authData objectForKey:@"UserIDKey"];
+        self.sinaweibo.expirationDate = [authData objectForKey:@"ExpirationDateKey"];
+    }
+    
+}
+
+
+//新浪微博注销代理
 
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
