@@ -17,4 +17,7 @@
 @property (nonatomic, strong) WeiboLayoutFrame *layoutFrame;
 
 @property (nonatomic, assign) NSInteger *totalNumber;
+
+- (void)loadWeiboCommentNewData;
+
 @end

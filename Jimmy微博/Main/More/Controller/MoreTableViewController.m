@@ -10,6 +10,7 @@
 #import "ThemeManager.h"
 #import "ThemeLabel.h"
 #import "ThemeImageView.h"
+#import "AppDelegate.h"
 
 @interface MoreTableViewController ()
 
@@ -59,6 +60,26 @@
     //主题名字
     _themeNameLabel.text = manager.themeName;
     
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section == 2) {
+        AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+        SinaWeibo *sinaWeibo = appDelegate.sinaweibo;
+        
+        if ([_logoutLabel.text isEqualToString:@"注销登录"]) {
+            [sinaWeibo logOut];
+            _logoutLabel.text = @"登录";
+        }else {
+            _logoutLabel.text = @"注销登录";
+            
+            [sinaWeibo logIn];
+        }
+        
+        
+        
+    }
 }
 
 /*

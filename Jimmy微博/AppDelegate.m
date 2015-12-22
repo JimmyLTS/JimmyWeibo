@@ -15,6 +15,7 @@
 
 #import "BaseNavigationController.h"
 #import "HomeViewController.h"
+#import "WeiboDetailViewController.h"
 
 @interface AppDelegate ()
 
@@ -43,10 +44,10 @@
                                              leftDrawerViewController:leftViewController
                                              rightDrawerViewController:rightViewContoller];
     
-    [drawerController setMaximumRightDrawerWidth:150.0];
-    [drawerController setMaximumLeftDrawerWidth:150.0];
+    [drawerController setMaximumRightDrawerWidth:80.0];
+    [drawerController setMaximumLeftDrawerWidth:200.0];
     
-    [drawerController setOpenDrawerGestureModeMask:MMOpenDrawerGestureModeNone];
+    [drawerController setOpenDrawerGestureModeMask:MMOpenDrawerGestureModeAll];
     [drawerController setCloseDrawerGestureModeMask:MMCloseDrawerGestureModeAll];
     
     MMDrawerControllerDrawerVisualStateBlock block = [MMDrawerVisualState swingingDoorVisualStateBlock];
@@ -76,11 +77,19 @@
     MainTabBarController *main = (MainTabBarController *)draw.centerViewController;
     NSArray *vcArray = main.viewControllers;
     
-    BaseNavigationController *b = (BaseNavigationController *)vcArray[0];
+    BaseNavigationController *base = (BaseNavigationController *)vcArray[0];
     
-    HomeViewController *h = (HomeViewController *)b.viewControllers.lastObject;
+    UIViewController *last = base.viewControllers.lastObject;
     
-    [h loadWeiboNewData];
+    if ([last isKindOfClass:[HomeViewController class]]) {
+        HomeViewController *h = (HomeViewController *)last;
+        [h loadWeiboNewData];
+    }else if ([last isKindOfClass:[WeiboDetailViewController class]]) {
+        WeiboDetailViewController *detail = (WeiboDetailViewController *)last;
+        [detail loadWeiboCommentNewData];
+    }
+    
+    
 }
 
 

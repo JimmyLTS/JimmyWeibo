@@ -43,7 +43,7 @@
     NSString *text = self.weiboModel.text;
 
     CGFloat textHeight = [WXLabel getTextHeight:weiboTextFont width:textWidth text:text linespace:5];
-    _textFrame = CGRectMake(10, 10, textWidth, textHeight);
+    _textFrame = CGRectMake(10, 10, textWidth, textHeight + 5);
     
     //3、判断是否有转发
     if (self.weiboModel.repostWeiboModel == nil) {
@@ -85,7 +85,7 @@
         NSString *rText = self.weiboModel.repostWeiboModel.text;
         CGFloat rTextWidth = textWidth - 20;
         CGFloat rTextHeight = [WXLabel getTextHeight:reWeiboTextFont width:rTextWidth text:rText linespace:5];
-        _rTextFrame = CGRectMake(bgImageX + 10, bgImageY + 10, rTextWidth, rTextHeight);
+        _rTextFrame = CGRectMake(bgImageX + 10, bgImageY + 10, rTextWidth, rTextHeight + 5);
         
         if (self.weiboModel.repostWeiboModel.thumbnailImage != nil) {
             if (_isDetail) {

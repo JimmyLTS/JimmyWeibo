@@ -43,7 +43,6 @@
 //    [self loadWeiboNewData];
     
     [self refreshHomeData];
-    
 }
 
 #pragma mark - 刷新页面

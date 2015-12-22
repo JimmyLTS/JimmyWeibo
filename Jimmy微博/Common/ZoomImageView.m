@@ -10,10 +10,9 @@
 #import "UIImageView+WebCache.h"
 #import "UIImage+GIF.h"
 #import <ImageIO/ImageIO.h>
+#import "UIView+UIViewController.h"
 
-@implementation ZoomImageView {
-    NSHTTPURLResponse *httpResponse;
-}
+@implementation ZoomImageView
 
 #pragma mark - 初始化方法
 - (instancetype)initWithFrame:(CGRect)frame
@@ -54,12 +53,21 @@
 
 - (void)_zoomInAction {
     
+    if ([self.delegate respondsToSelector:@selector(imageViewWillZoomIn:)]) {
+        [self.delegate imageViewWillZoomIn:self];
+    }
+    
     //01、添加 scrollView 和 fullImageView
     [self _creatSubviews];
     
     //02、转换坐标，设置 fullImageView 的frame
     CGRect frame = [self convertRect:self.bounds toView:self.window];
     _fullImageView.frame = frame;
+    
+    //    //04、添加缩小手势
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(zoomOutAction)];
+    [_scrollView addGestureRecognizer:tap];
+
     
     //03、添加缩放动画
     [UIView animateWithDuration:0.4 animations:^{
@@ -70,12 +78,50 @@
         [self _loadFullImage];
     }];
     
-    //04、添加缩小手势
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(zoomOutAction)];
-    [_fullImageView addGestureRecognizer:tap];
+//    //04、添加缩小手势
+//    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(zoomOutAction)];
+//    [_fullImageView addGestureRecognizer:tap];
+    
+    //05、添加长按保存图片
+    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(saveImage:)];
+    [_fullImageView addGestureRecognizer:longPress];
 }
 
+- (void)saveImage:(UILongPressGestureRecognizer *)longPress {
+    if (longPress.state == UIGestureRecognizerStateBegan) {
+        
+        UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:@"保存图片" message:@"是否保存当前图片" delegate:self cancelButtonTitle:@"否" otherButtonTitles:@"是", nil];
+        
+        [alertView show];
+        
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 1) {
+        
+        UIImageWriteToSavedPhotosAlbum(_fullImageView.image, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+    }
+}
+
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
+    NSLog(@"保存成功");
+    
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.window animated:YES];
+    
+    hud.mode = MBProgressHUDModeCustomView;
+    hud.customView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"37x-Checkmark"]];
+    hud.labelText = @"保存成功";
+    [hud hide:YES afterDelay:1];
+}
+
+
 - (void)zoomOutAction {
+    [_hud hide:YES];
+    
+    if ([self.delegate respondsToSelector:@selector(imageViewWillZoomOut:)]) {
+        [self.delegate imageViewWillZoomOut:self];
+    }
     
     _scrollView.backgroundColor = [UIColor clearColor];
 
@@ -114,8 +160,7 @@
 //        [self _downloadFullImageConnection];
         
     }
-    
-    
+
 }
 
 
@@ -138,7 +183,7 @@
     _fullImageData = [[NSMutableData alloc]init];
     
     //获取文件大小
-    httpResponse = (NSHTTPURLResponse *)response;
+    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
     NSDictionary *httpHeader = [httpResponse allHeaderFields];
     _dataLength = [[httpHeader objectForKey:@"Content-Length"] floatValue];
     NSLog(@"%@", httpHeader);
@@ -166,6 +211,9 @@ didCompleteWithError:(nullable NSError *)error {
     _fullImageView.image = image;
     
     [self setFrameForLongImage:image];
+    
+    [self showGifImageView];
+    
     _fullImageData = nil;
     
 }
@@ -328,8 +376,5 @@ didCompleteWithError:(nullable NSError *)error {
     
     return _fullImageView;
 }
-
-#pragma mark - gif 图片
-
 
 @end

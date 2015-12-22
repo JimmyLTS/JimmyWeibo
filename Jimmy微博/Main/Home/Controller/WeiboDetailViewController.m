@@ -106,7 +106,7 @@
     
     NSMutableDictionary *params = [[NSMutableDictionary alloc]init];
     
-    NSString *idStr = [_layoutFrame.weiboModel.weiboId stringValue];
+    NSString *idStr = _layoutFrame.weiboModel.weiboIdStr;
     
     [params setObject:idStr forKey:@"id"];
     

@@ -11,6 +11,7 @@
 @interface BaseViewController : UIViewController
 //通过activityView显示提示
 - (void)showLoading:(BOOL)show;
+- (void)setNavBarItem;
 
 //通过三方显示提示
 - (void)showHUD:(NSString *)title;

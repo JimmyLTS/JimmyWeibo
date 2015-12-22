@@ -10,7 +10,16 @@
 #import "MBProgressHUD.h"
 #import "UIViewExt.h"
 
-@interface ZoomImageView : UIImageView<UIScrollViewDelegate,NSURLConnectionDataDelegate,NSURLSessionDataDelegate> {
+@class ZoomImageView;
+@protocol ZoomImageViewDelegate <NSObject>
+
+- (void)imageViewWillZoomIn:(ZoomImageView *)imageView;
+- (void)imageViewWillZoomOut:(ZoomImageView *)imageView;
+
+@end
+
+
+@interface ZoomImageView : UIImageView<UIScrollViewDelegate,NSURLConnectionDataDelegate,NSURLSessionDataDelegate,UIAlertViewDelegate> {
     
     NSMutableData *_fullImageData; //图片数据
     CGFloat _dataLength; //数据总长度
@@ -26,4 +35,5 @@
 
 @property (nonatomic, strong)UIImageView *gifImageView;
 
+@property (nonatomic, weak)id<ZoomImageViewDelegate> delegate;
 @end

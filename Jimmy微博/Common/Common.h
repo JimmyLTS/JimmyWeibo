@@ -39,6 +39,9 @@
 #define nearby_pois @"place/nearby/pois.json" // 附近商圈
 #define nearby_timeline  @"place/nearby_timeline.json" //附近动态
 
+#define BASEURL  @"https://api.weibo.com/2/"
+#define BaseUrl @"https://api.weibo.com/2/"
+
 
 //微博字体
 #define FontSize_Weibo(isDetail) isDetail?18:16  //微博字体
@@ -48,6 +51,7 @@
 
 //手机版本
 #define ios7 ([[UIDevice currentDevice].systemVersion floatValue] >= 7.0)
+#define ios8 ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0)
 
 //identify
 #define kWeiboCell @"WeiboCell"

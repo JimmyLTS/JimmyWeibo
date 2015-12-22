@@ -13,6 +13,7 @@
 #import "HomeViewController.h"
 #import "ThemeManager.h"
 #import "UIView+UIViewController.h"
+#import "AppDelegate.h"
 
 @implementation WeiboTabelView
 
@@ -74,6 +75,13 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
+    AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+    SinaWeibo *sinaWeibo = appDelegate.sinaweibo;
+    
+    if (![sinaWeibo isAuthValid]) {
+        [sinaWeibo logIn];
+    }
+    
     HomeViewController *home = (HomeViewController *)self.viewController;
     WeiboDetailViewController *weiboDetailController = [[WeiboDetailViewController alloc]init];
     
@@ -81,6 +89,8 @@
     [weiboDetailController setHidesBottomBarWhenPushed:YES];
     
     [home.navigationController pushViewController:weiboDetailController animated:YES];
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 
